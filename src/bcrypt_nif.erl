@@ -54,7 +54,10 @@ init() ->
 %%--------------------------------------------------------------------
 gen_salt(LogRounds)
   when is_integer(LogRounds), LogRounds < 32, LogRounds > 3 ->
-    R = crypto:rand_bytes(16),
+    R = case erlang:function_exported(crypto, strong_rand_bytes, 1) of
+      true -> crypto:strong_rand_bytes(16);
+      false -> crypto:rand_bytes(16)
+    end,
     encode_salt(R, LogRounds).
 
 encode_salt(_R, _LogRounds) ->

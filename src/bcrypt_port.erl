@@ -39,12 +39,20 @@ start_link() ->
 stop() -> gen_server:call(?MODULE, stop).
 
 gen_salt(Pid) ->
-    R = crypto:rand_bytes(16),
+    R = rand_bytes(16),
     gen_server:call(Pid, {encode_salt, R}, infinity).
 
 gen_salt(Pid, LogRounds) ->
-    R = crypto:rand_bytes(16),
+    R = rand_bytes(16),
     gen_server:call(Pid, {encode_salt, R, LogRounds}, infinity).
+
+rand_bytes(N) ->
+   case erlang:function_exported(crypto, strong_rand_bytes, 1) of
+      % erlang 19 and above
+      true -> crypto:strong_rand_bytes(N);
+      % compatibility for old versions
+      false -> crypto:rand_bytes(N)
+   end.
 
 hashpw(Pid, Password, Salt) ->
     gen_server:call(Pid, {hashpw, Password, Salt}, infinity).
